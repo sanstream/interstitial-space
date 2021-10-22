@@ -20,6 +20,8 @@ const gridSize = {
   height: 100,
 }
 
+let secondsTracker = 0
+
 const sketch = ({ context }) => {
   // Create a renderer
   const renderer = new THREE.WebGLRenderer({
@@ -100,6 +102,11 @@ const sketch = ({ context }) => {
     },
     // Update & render your scene here
     render({ time }) {
+      const roundedTime = parseInt(time)
+      if (secondsTracker < roundedTime) {
+        secondsTracker = roundedTime
+        // grow existing lines and kill some of them.
+      }
       controls.update();
       renderer.render(scene, camera);
     },
