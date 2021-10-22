@@ -47,33 +47,26 @@ const sketch = ({ context }) => {
   // Setup your scene
   const scene = new THREE.Scene();
 
-  // Setup a geometry
-  const geometry = new THREE.BoxGeometry(3,3,3);
-
-  // Setup a material
-  const material = new THREE.MeshBasicMaterial({
-    color: "red",
-    wireframe: false
-  });
-
   const lineMaterial = new THREE.LineBasicMaterial({
     color: '#121212',
     linewidth: 1,
   });
 
-  // Setup a mesh with geometry + material
-  const mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
-  mesh.position.set(0,0,0)
+  const defaultY = 0
+  const seedArray = new Array(1000)
+  const sizing = gridSize.height
+  const vertices = new Float32Array(
+    [].concat(...seedArray.fill(null).map(_ => {
+      return [Math.random() * sizing - sizing/2, defaultY, Math.random() * sizing - sizing/2,]
+    }))
+  );
 
-  const points = [
-    new THREE.Vector3( 0, 0, 0 ),
-    new THREE.Vector3( 5, 0, 5 ),
-  ]
+  // itemSize = 3 because there are 3 values (components) per vertex
+  // geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
   const lineGeometry = new THREE.BufferGeometry()
-    .setFromPoints(points)
-  const line = new THREE.Line(lineGeometry, lineMaterial)
-  scene.add(line)
+  lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+  const lines = new THREE.LineSegments(lineGeometry, lineMaterial)
+  scene.add(lines)
   const light = new THREE.PointLight('white')
   scene.add(light)
   // light.position.set(7, 7, 0)
@@ -82,8 +75,8 @@ const sketch = ({ context }) => {
   // const lighthelper = new THREE.PointLightHelper(light)
   // scene.add(lighthelper)
 
-  const gridHelper = new THREE.GridHelper(gridSize.height, 10, 'green')
-  scene.add(gridHelper)
+  // const gridHelper = new THREE.GridHelper(gridSize.height, 10, 'green')
+  // scene.add(gridHelper)
 
   return {
     // Handle resize events here
