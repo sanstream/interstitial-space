@@ -48,19 +48,30 @@ const sketch = ({ context }) => {
   const scene = new THREE.Scene();
 
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: '#121212',
-    linewidth: 1,
+    color: 0x121212,
+    linewidth: 1.5,
   });
 
   const defaultY = 0
-  const mean = gridSize.height / 2
+  const halfAnEdge = gridSize.height / 2
+  const standardDeviation = halfAnEdge * 0.1
   const seedArray = new Array(1000)
   const vertices = new Float32Array(
     [].concat(...seedArray.fill(null).map(_ => {
-      const randomX = random.gaussian(0, mean * 0.3)
-      const randomZ = random.gaussian(0, mean * 0.3)
+      let randomX = random.gaussian(0, standardDeviation)
+      randomX = randomX <= 0 ? -halfAnEdge - randomX : halfAnEdge - randomX
+      let randomZ = random.range(-halfAnEdge, halfAnEdge)
+      // let randomZ = random.range(-halfAnEdge, halfAnEdge)
+      randomZ = randomZ <= 0 ? -halfAnEdge - randomZ : halfAnEdge - randomZ
+      const position = new THREE.Vector3(randomX, 0, randomZ)
+      const otherPosition = position.multiply(
+        new THREE.Vector3(halfAnEdge * 0.5, 0, 0)
+      )
       // make segments smaller by bringing positions closer together.
-      return [randomX, defaultY, randomZ,]
+      return [
+        randomX, defaultY, randomZ,
+        otherPosition.x, defaultY, otherPosition.z,
+      ]
     }))
   );
 
