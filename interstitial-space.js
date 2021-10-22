@@ -5,7 +5,7 @@ global.THREE = require("three");
 require("three/examples/js/controls/OrbitControls");
 
 const canvasSketch = require("canvas-sketch");
-const { GridHelper } = require("three")
+const random = require('canvas-sketch-util/random')
 
 const settings = {
   // Make the loop animated
@@ -53,16 +53,17 @@ const sketch = ({ context }) => {
   });
 
   const defaultY = 0
+  const mean = gridSize.height / 2
   const seedArray = new Array(1000)
-  const sizing = gridSize.height
   const vertices = new Float32Array(
     [].concat(...seedArray.fill(null).map(_ => {
-      return [Math.random() * sizing - sizing/2, defaultY, Math.random() * sizing - sizing/2,]
+      const randomX = random.gaussian(0, mean * 0.3)
+      const randomZ = random.gaussian(0, mean * 0.3)
+      // make segments smaller by bringing positions closer together.
+      return [randomX, defaultY, randomZ,]
     }))
   );
 
-  // itemSize = 3 because there are 3 values (components) per vertex
-  // geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
   const lineGeometry = new THREE.BufferGeometry()
   lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
   const lines = new THREE.LineSegments(lineGeometry, lineMaterial)
