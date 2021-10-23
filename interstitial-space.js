@@ -54,31 +54,36 @@ const sketch = ({ context }) => {
     linewidth: 1.5,
   });
 
-  const defaultY = 0
+  const defaultY = 2
   const halfAnEdge = gridSize.height / 2
   const standardDeviation = halfAnEdge * 0.1
-  const seedArray = new Array(1000)
-  const vertices = new Float32Array(
-    [].concat(...seedArray.fill(null).map(_ => {
-      let randomX = random.gaussian(0, standardDeviation)
-      randomX = randomX <= 0 ? -halfAnEdge - randomX : halfAnEdge - randomX
-      let randomZ = random.range(-halfAnEdge, halfAnEdge)
-      // let randomZ = random.range(-halfAnEdge, halfAnEdge)
-      randomZ = randomZ <= 0 ? -halfAnEdge - randomZ : halfAnEdge - randomZ
-      const position = new THREE.Vector3(randomX, 0, randomZ)
-      const otherPosition = position.multiply(
-        new THREE.Vector3(halfAnEdge * 0.5, 0, 0)
-      )
-      // make segments smaller by bringing positions closer together.
-      return [
-        randomX, defaultY, randomZ,
-        otherPosition.x, defaultY, otherPosition.z,
-      ]
-    }))
-  );
+  const intialNOLines = 1000
+  const extraNOLines = 3000
+  const seedArray = new Array(intialNOLines)
 
+  const vertices = new Float32Array(intialNOLines * extraNOLines * 3 * 2)
   const lineGeometry = new THREE.BufferGeometry()
   lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+  let counter = 0
+  seedArray.fill(null).forEach((_, index) => {
+    let randomX = random.gaussian(0, standardDeviation)
+    randomX = randomX <= 0 ? -halfAnEdge - randomX : halfAnEdge - randomX
+    let randomZ = random.range(-halfAnEdge, halfAnEdge)
+    // let randomZ = random.range(-halfAnEdge, halfAnEdge)
+    randomZ = randomZ <= 0 ? -halfAnEdge - randomZ : halfAnEdge - randomZ
+    const position = new THREE.Vector3(randomX, 0, randomZ)
+    const otherPosition = position.multiply(
+      new THREE.Vector3(halfAnEdge * 0.5, 0, 0)
+    )
+    // make segments smaller by bringing positions closer together.
+    vertices[counter ++] = randomX
+    vertices[counter ++] = defaultY
+    vertices[counter ++] = randomZ
+    vertices[counter ++] = otherPosition.x
+    vertices[counter ++] = defaultY
+    vertices[counter ++] =  otherPosition.z
+  })
+
   const lines = new THREE.LineSegments(lineGeometry, lineMaterial)
   scene.add(lines)
   const light = new THREE.PointLight('white')
@@ -89,7 +94,7 @@ const sketch = ({ context }) => {
   // const lighthelper = new THREE.PointLightHelper(light)
   // scene.add(lighthelper)
 
-  // const gridHelper = new THREE.GridHelper(gridSize.height, 10, 'green')
+  // const gridHelper = new THREE.GridHelper(gridSize.height, 10, 'green', 'red')
   // scene.add(gridHelper)
 
   return {
@@ -106,6 +111,7 @@ const sketch = ({ context }) => {
       if (secondsTracker < roundedTime) {
         secondsTracker = roundedTime
         // grow existing lines and kill some of them.
+        //sample 3 random lines from the set and extend them:
       }
       controls.update();
       renderer.render(scene, camera);
